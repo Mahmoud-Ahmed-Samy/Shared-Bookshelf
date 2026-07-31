@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BookShelf</title>
+    <!-- Help provided using Claude: Netflix theme fonts (Bebas Neue for the wordmark, Inter for everything else) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <!-- Inline SVG favicon to avoid 404 for /favicon.ico during development -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23e50914'/%3E%3Ctext x='50' y='62' font-size='56' text-anchor='middle' fill='white' font-family='Arial'>B</text%3E%3C/svg%3E">
+  </head>
+  <body>
+    <noscript>
+      <div style="padding:24px;color:#fff;background:#111;font-family:Arial,sans-serif;">
+        JavaScript is required to run BookShelf. Please enable JavaScript and reload the page.
+      </div>
+    </noscript>
+    <div id="root"></div>
+    <div id="client-fallback" style="display:none;position:fixed;inset:12px;background:#111;color:#fff;z-index:9999;padding:18px;border-radius:8px;font-family:Inter,Arial,sans-serif;">
+      <strong>BookShelf failed to start.</strong>
+      <div id="client-fallback-msg">Checking for errors...</div>
+      <button id="client-fallback-refresh" style="margin-top:10px;padding:8px 10px;border-radius:6px;">Reload</button>
+    </div>
+    <script>
+      // If React doesn't mount within 2s, show a fallback message so the user isn't stuck with a black screen.
+      // Check for both the main app root (.nf-app) and the login page root (.lp-page).
+      const rootCheck = () => document.querySelector('.nf-app, .lp-page');
+      const fallback = document.getElementById('client-fallback');
+      const msg = document.getElementById('client-fallback-msg');
+      const reloadBtn = document.getElementById('client-fallback-refresh');
+      let mounted = false;
+      const timer = setTimeout(() => {
+        if (!rootCheck()) {
+          fallback.style.display = 'block';
+          msg.textContent = 'App did not mount. Open the browser console for error details.';
+        } else {
+          mounted = true;
+        }
+      }, 1200);
+      // also observe DOM in case mount happens slightly later
+      const obs = new MutationObserver(() => {
+        if (rootCheck()) {
+          mounted = true;
+          fallback.style.display = 'none';
+          clearTimeout(timer);
+          obs.disconnect();
+        }
+      });
+      obs.observe(document.body, { childList: true, subtree: true });
+      reloadBtn.addEventListener('click', () => location.reload());
+    </script>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

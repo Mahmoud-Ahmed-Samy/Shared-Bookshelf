@@ -1,0 +1,2 @@
+-- Schema adjustments disabled. ALTER TABLE caused H2/Dialect mismatches in some environments.
+-- If you need to change column types, run a controlled migration or delete the H2 database file in backend/data to let Hibernate recreate the schema.

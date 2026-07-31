@@ -1,0 +1,518 @@
+{
+  "info": {
+    "name": "Bookshelf API",
+    "description": "Complete API collection for Bookshelf application - a collaborative book management system with JWT authentication, book management, edit requests, and activity tracking.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{jwt_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "description": "User authentication endpoints",
+      "item": [
+        {
+          "name": "Register User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201 || pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"user_id\", jsonData.id);",
+                  "    pm.environment.set(\"user_email\", jsonData.email);",
+                  "    pm.environment.set(\"user_username\", jsonData.username);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \\\"email\\\": \\\"testuser@example.com\\\",\\n  \\\"username\\\": \\\"testuser\\\",\\n  \\\"password\\\": \\\"Password123!\\\"\\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "register"]
+            },
+            "description": "Register a new user account. Requires email, username, and password. Email and username must be unique."
+          },
+          "response": []
+        },
+        {
+          "name": "Login User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"jwt_token\", jsonData.token);",
+                  "    pm.environment.set(\"user_username\", jsonData.username);",
+                  "    pm.environment.set(\"user_role\", jsonData.role);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \\\"email\\\": \\\"testuser@example.com\\\",\\n  \\\"password\\\": \\\"Password123!\\\"\\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Login with email and password. Returns JWT token for authentication."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Books",
+      "description": "Book management endpoints",
+      "item": [
+        {
+          "name": "Get All Books",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.length > 0) {",
+                  "        pm.environment.set(\"book_id\", jsonData[0].id);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/books",
+              "host": ["{{base_url}}"],
+              "path": ["api", "books"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "lord of the rings",
+                  "disabled": true,
+                  "description": "Search by title or author"
+                },
+                {
+                  "key": "yearFrom",
+                  "value": "2000",
+                  "disabled": true,
+                  "description": "Minimum publication year"
+                },
+                {
+                  "key": "yearTo",
+                  "value": "2025",
+                  "disabled": true,
+                  "description": "Maximum publication year"
+                },
+                {
+                  "key": "exactYear",
+                  "value": "2020",
+                  "disabled": true,
+                  "description": "Exact publication year"
+                },
+                {
+                  "key": "trusted",
+                  "value": "true",
+                  "disabled": true,
+                  "description": "Filter by trusted books (found online)"
+                },
+                {
+                  "key": "sortField",
+                  "value": "title",
+                  "disabled": true,
+                  "description": "Sort field (title, author, year)"
+                },
+                {
+                  "key": "sortDirection",
+                  "value": "asc",
+                  "disabled": true,
+                  "description": "Sort direction (asc, desc)"
+                }
+              ]
+            },
+            "description": "Get all books with optional filtering and sorting. Returns list of books with metadata."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Book by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/books/{{book_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "books", "{{book_id}}"]
+            },
+            "description": "Get a specific book by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Book",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"book_id\", jsonData.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \\\"title\\\": \\\"The Great Gatsby\\\",\\n  \\\"author\\\": \\\"F. Scott Fitzgerald\\\",\\n  \\\"genre\\\": \\\"Fiction\\\",\\n  \\\"year\\\": 1925,\\n  \\\"coverUrl\\\": \\\"https://covers.openlibrary.org/b/id/5104283-M.jpg\\\",\\n  \\\"foundOnline\\\": true\\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/books",
+              "host": ["{{base_url}}"],
+              "path": ["api", "books"]
+            },
+            "description": "Create a new book. Requires authenticated user. Title, author, and year are required. Year must be between 1450 and 2026."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Book",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \\\"title\\\": \\\"The Great Gatsby (Revised)\\\",\\n  \\\"author\\\": \\\"F. Scott Fitzgerald\\\",\\n  \\\"genre\\\": \\\"Classic Fiction\\\",\\n  \\\"year\\\": 1925,\\n  \\\"coverUrl\\\": \\\"https://covers.openlibrary.org/b/id/5104283-M.jpg\\\",\\n  \\\"foundOnline\\\": true\\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/books/{{book_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "books", "{{book_id}}"]
+            },
+            "description": "Update an existing book. Only owner or users with approved edit requests can update."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Book",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/books/{{book_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "books", "{{book_id}}"]
+            },
+            "description": "Delete a book. Only owner can delete."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete All Books (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/books/all",
+              "host": ["{{base_url}}"],
+              "path": ["api", "books", "all"]
+            },
+            "description": "Delete all books in the system. Admin only."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Edit Requests",
+      "description": "Edit request management - users can request permission to edit books",
+      "item": [
+        {
+          "name": "Create Edit Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"edit_request_id\", jsonData.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/books/{{book_id}}/edit-requests",
+              "host": ["{{base_url}}"],
+              "path": ["api", "books", "{{book_id}}", "edit-requests"]
+            },
+            "description": "Request permission to edit a book. Requester cannot be the owner."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Pending Edit Requests",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/books/{{book_id}}/edit-requests",
+              "host": ["{{base_url}}"],
+              "path": ["api", "books", "{{book_id}}", "edit-requests"]
+            },
+            "description": "Get all pending edit requests for a book. Only book owner can view."
+          },
+          "response": []
+        },
+        {
+          "name": "Approve Edit Request",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/books/{{book_id}}/edit-requests/{{edit_request_id}}/approve",
+              "host": ["{{base_url}}"],
+              "path": ["api", "books", "{{book_id}}", "edit-requests", "{{edit_request_id}}", "approve"]
+            },
+            "description": "Approve an edit request. Only book owner can approve."
+          },
+          "response": []
+        },
+        {
+          "name": "Deny Edit Request",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/books/{{book_id}}/edit-requests/{{edit_request_id}}/deny",
+              "host": ["{{base_url}}"],
+              "path": ["api", "books", "{{book_id}}", "edit-requests", "{{edit_request_id}}", "deny"]
+            },
+            "description": "Deny an edit request. Only book owner can deny."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Activity",
+      "description": "Activity tracking endpoints",
+      "item": [
+        {
+          "name": "Get Latest Activity",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/activity",
+              "host": ["{{base_url}}"],
+              "path": ["api", "activity"]
+            },
+            "description": "Get the latest 50 activity events (book added, book edited, edit requested, etc.)"
+          },
+          "response": []
+        },
+        {
+          "name": "Clear Activity (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/activity",
+              "host": ["{{base_url}}"],
+              "path": ["api", "activity"]
+            },
+            "description": "Clear all activity events. Admin only."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Open Library Integration",
+      "description": "External book data lookup from Open Library API",
+      "item": [
+        {
+          "name": "Search Book",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200 && pm.response.json()) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.coverId) {",
+                  "        pm.environment.set(\"cover_id\", jsonData.coverId);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/open-library/search?title=1984&author=George Orwell",
+              "host": ["{{base_url}}"],
+              "path": ["api", "open-library", "search"],
+              "query": [
+                {
+                  "key": "title",
+                  "value": "1984",
+                  "description": "Book title (required)"
+                },
+                {
+                  "key": "author",
+                  "value": "George Orwell",
+                  "description": "Book author (optional)"
+                }
+              ]
+            },
+            "description": "Search for book details from Open Library. Useful for finding covers and metadata."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Book Cover",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/open-library/covers/{{cover_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "open-library", "covers", "{{cover_id}}"]
+            },
+            "description": "Get a book cover image by cover ID (obtained from search)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Audio",
+      "description": "Audio endpoints",
+      "item": [
+        {
+          "name": "Get Waka Audio",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/audio/waka",
+              "host": ["{{base_url}}"],
+              "path": ["api", "audio", "waka"]
+            },
+            "description": "Get waka.mp3 audio file"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "jwt_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_email",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_username",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_role",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "book_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "edit_request_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "cover_id",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
